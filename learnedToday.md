@@ -63,8 +63,17 @@ So
 ## Thread failure ##
 
 * if two thread can't access some fields exclusively, it will result in getting you in trouble, we call it unsafe failure.
-* if two thread synchronized, but result in some dead lock, we call it thread liveness failure since none of them go forward.
-* one thread can publish object to other threads successfully , we call it safe publish.
+* if two thread synchronized, but result in some dead lock or the thread can't advance, we call it thread liveness failure since none of them go forward.
+* one thread can modify a object in a short time and only sync the shared object reference. After that point, we don't change the object anymore. the object is effectively immutable and one thread can publish the shared object to other threads safely, we call it safe publish.
+
+There has many ways to do that: e.g 
+
+** static field of class
+** volatile field
+** final filed 
+** concurrent collection.
+
+
 
 
 ## CopyOnWriteList ##
