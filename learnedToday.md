@@ -1,4 +1,5 @@
 # 2016-07-30
+# 2016-07-31
 
 ## Synchronization Of Java 
 
@@ -68,17 +69,76 @@ So
 
 There has many ways to do that: e.g 
 
-** static field of class
-** volatile field
-** final filed 
-** concurrent collection.
-
+* static field of class
+* volatile field
+* final filed 
+* concurrent collection.
 
 
 
 ## CopyOnWriteList ##
 
+Two members of CopyOnWrite(abbr as COW) containers: 
 
+* CopyOnWriteArrayList
+* CopyOnWriteSet
+
+Of course we can easily writing out the COWMap.
+
+### COW Principals
+
+  * separate read from write. (simplified version of DB read/write split)
+
+Threre is no lock when reading and need lock when writing which means it quit suitable for more read less writ sceniaros.
+
+  * eventually consistent. Modification can't instantly reflected by other threads.
+
+When one thread do the updating, it will copy the array entirely and made the change on the new array. And change the reference to new array when modification completed.
+
+  * you can consider it when you need white/black list(serching keywords filtering).
+  
+  * Problems: it will almost double/trible the memory or even more.
+
+### COW Implement ###
+
+```java
+
+    public COWContainer<T> {
+        private ArrayList<T> list = new ArrayList<~>();
+        public COWContainer() {
+        
+        }
+        
+        public T get () {
+            return list.get();
+        } 
+        
+        public boolean add (T element) {
+            ReentryLock lock = this.lock;
+            
+            try {
+                lock.lock();
+                Object[] elements = getArray();
+                
+                Object[] newElements = Arrays.copyOf(elements, len + 1);
+                
+                newElements[len] = element;
+                
+                setArry(newElements);
+                
+                return true;
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+```
+  
+### Reference ###
+
+[coolshell CopyOnWriteArrayList](http://coolshell.cn/articles/11175.html)
+
+[CSDN CopyOnWritePrincipals](http://blog.csdn.net/zhangxs_3/article/details/8494675)
 
 ## Java Serialize interface 
 
