@@ -144,3 +144,76 @@ When one thread do the updating, it will copy the array entirely and made the ch
 
 ## Misc ##
 
+# 2016-08-01 #
+
+## JMeter ##
+
+JMeter is an opensource and powerfull tool as 
+
+* load generator (simulate multiple user by mutliple thread or process)
+* user run engine (simulate user behavior according to the script)
+* Resource generator (generate the load test data when press test)
+* reportor (create the report for user)
+
+JMeters has the following core conceptions:
+
+### TestPlan ###
+
+TestPlan is the root of the jmeter test, it represents a test. You can define
+Common user variables there and reference it from the subElement of the testPlan.
+
+### Sampler ###
+
+Sampler is an abstraction of request, its the core of the jmeter. A plenty of samplers inside the jmeter:
+
+* HttpRequest
+* HttpRestRequest rest sampler
+* Ftp
+* JDBC 
+* Beanshell sampler
+
+Beanshell sampler is most important one for very flexible usage because you can 
+call do program there. its syntax is very similar to java except that omitting the variable type.
+
+### Controller ###
+
+Controller AKA logic controller, it will controll the flow of the test case. 
+it simulate programmaing language unit:
+
+* switch
+* if
+* loop (foreach, while)
+* transaction (some kinds of synchronization). for example: all the request wait on somewhere and access the server simultaniously. it will act as atom, like the transaction in the database.
+
+* misc (Once only(for login), Random, Random order, Runtime controller (??))
+
+
+### Processor (pre/post)###
+
+Before you make an request, you may want to modify some of the url parameters and want to extract the response field from the response body. e.g: get context form the http json response body. 
+
+* BeansShell preProcessor/postProcessor (As a way of programming, you can do what ever)
+* JSON Path Extractor (get json body or field)
+* Result Action Handler. (do something according to the http status code)
+
+### Assert ###
+
+* when get response make sure the required condition is statified, just like unit test assert.
+* 
+
+### Timer ###
+
+* Synchronizing time??
+
+### Listener ###
+
+It is widely used as result collector, for example: display the test result, draw all the performance charts.
+
+### Variable And Function ###
+
+Jmeter has a lot of buildin functions, you can reference it as ${__function} in the configuration.
+
+### LifeCycle And Scope ###
+
+the scope as its parent-child relation ship.
+
