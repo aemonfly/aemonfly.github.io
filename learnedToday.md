@@ -217,3 +217,155 @@ Jmeter has a lot of buildin functions, you can reference it as ${__function} in 
 
 the scope as its parent-child relation ship.
 
+# 2016-08-02 #
+
+## Queue ##
+
+revisit the java queue, java provide two kinds of queue:
+
+* Blocking queue
+* Non-Blocking queue
+
+### Blocking queue method vector:
+
+
+|         | Throw Exception   | Return Boolean    | Maybe Blocked   | Block Wait Time   |
+| ------- |:-----------------:|:-----------------:|:---------------:| -----------------:|
+| Enqueue | add(e) :boolean   | offer(e) :boolean | put(e) : void   | offer(e,timeout)  |
+| Dequeue | remove(e):boolean | poll(): E         | take(): E       | poll(e,timeout)   |
+| Lookup  | elment() : E      | peek(): E         | N/A             | N/A               |
+
+
+### Notes:
+
+lookup methods (element and peek) just retrieves but not remove it from queue.
+
+
+### Queue constrains:
+
+* You can't add more element when queue is full. (You can sepcify the capacity of queue when creating it)
+* You can't delete element when queue is empty.
+
+So different method response differently when constrains are broken.
+
+* Throw Exception (add, remove)
+* Return boolean value to indicate success or not.
+* Blocking current thread until it success.(constrains are met)
+
+Blocking queue provides more flexibility, you can set timeout for operation(add or remove), which is frequently used
+when programming.
+
+*** Whatever adding method, it will throw nullPointerException if the parameter e is null.***
+
+Impl Considerations:
+
+* add() => offer() and throw illegalStateException if offer return false.
+* remove() => pool() and throw NoSuchElementExceptions if poll return false.
+* put/take use reentryLock synchronize the access and make the current thread wait on corresponding conditions.
+
+
+### BlockingQueue category:
+
+* ArrayBlockingQueue
+* LinkedBlockingQueue
+* PriorityBlockingQueue
+* SynchronousQueue
+* ScheduledThreadPoolExecutor DelayedWorkQueue 
+* BlockingDeque and TransferQueue (interface)
+* LinkedBlockingDeque impl BlockingDeque
+* LinkedTransferQueue impl TransferQueue 
+
+LinkedBlocking use two reentrantLock, putLock and takeLock to increase the concurrent threads over the queue.
+
+
+### Non-Blocking queue:
+
+* concurrentLinkedQueue
+* concurrentLinkedDeque
+
+
+### Other Concurrent Data Structure:
+
+* ConcurrentMap & ConcurrentNavigableMap (interface)
+* ConcurrentHashMap & ConcurrentSkipListMap
+* ConcurrentSkipListSet
+
+
+### concurrentLinkedQueue lock-free, wait-free analysis.
+
+Basic Idea.
+
+The lock will involve thread switch which is very heavy operation. the lock make sure two things: 
+
+* Access the shared data structure exclusively.(implied that atom change and order)
+* The modification is visible to other thread.
+
+for lock-free, we can use ** volatile ** to assure the visiblity.
+
+for atom change, we can use ** atomic variable ** to assure the field change's atom.
+
+But for the order, we need to handle it carefully. for e.g:
+when insert a node into the link, we firstly insert the new node into the link end and then make the tail pointing the new node.
+
+Without lock, many threads can do any step of the above two steps, we need a way to make sure the thread cooperate with each other well. 
+
+Say, two thread try to insert new nodes into link at the same time. Both of them will insert the new code of themselves to the end of the link, obviously the last modification will win, but it is not what want. We need way to make sure threads aware of other thread's existence, and work together with them.
+
+The easyiest way maybe detect the change of current data structure, say if tail's next has been change by others, if the tail is the real tail. As for work together, for link, we can help advance the tail to the real tail of current link.
+
+Code Fragment as belowing:
+
+```
+Item newElement = e;
+
+Node<Item> t = tail;
+
+//we can't use tail.next() here
+//since tail get change right after we assign the tail to t even though it is
+//very low probably.
+
+Node<Item> s = t.next();
+
+//update tail's next
+
+    if( t == tail) {
+        if (s == null) {
+            if(t.casNext(s, n)) {
+                casTail(t,n);
+                return true;
+            }
+        } else {
+        // help avance the tail 
+            casTail(t, s)
+        }
+
+    }
+
+```
+
+More notes about casTail and casNext, it use the hardware primitives compareAndSet to make sure the change operation's atom.
+
+
+### Atomic Variable ###
+
+the java util package has some atomic variables: such as
+
+* AtomicReferenceFiledUpdater
+* AtomicLong
+* AtomicIntegrate
+
+
+### Resource Reference ###
+
+[java thread safe queue summary](http://hellosure.iteye.com/blog/1126541)
+
+[java wait notify misc](http://blog.csdn.net/tayanxunhua/article/details/20998809)
+
+[java memory model](http://lujinxiong.blog.51cto.com/9367514/1786558)
+
+[java non-block algrithom introduction](http://www.ibm.com/developerworks/cn/java/j-jtp04186/)
+
+        
+# 2016-08-03 #
+# 2016-08-04 #
+
