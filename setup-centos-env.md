@@ -153,8 +153,8 @@ Install Tomcat 8 to configure JAVA Application Server](https://www.server-world.
 			
 			```
 				<VirtualHost *:80 >
-					ServerName 139.196.181.30
-					ServerAlias 139.196.181.30
+					ServerName ${server_ip}
+					ServerAlias ${server_ip}
 	
 					ProxyPass "/" "http://localhost:8080/" max=300
 					ProxyPassReverse "/" "http://localhost:8080/"
