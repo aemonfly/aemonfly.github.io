@@ -369,3 +369,77 @@ the java util package has some atomic variables: such as
 # 2016-08-03 #
 # 2016-08-04 #
 
+
+### SynchronousQueue ###
+
+synchronousQueue is special queue, its size is zero. You can't peek its element, it behavior as following:
+
+* isEmpty => always true
+* size() => 0
+* peek() => null
+* element() => throw NoSuchElementException() 
+
+it is used to sync two threads exchange data. When one thread try to put, if no thread are waiting for consuming,
+the put thread will be blocked until some one to take the data away.
+
+The producer and consumer wait for each other, and exchange data and then say goodbye to each other. its behavior 
+really like cyclicBarrier, the thread wait for each other. But synchronousQueue do more, exchange data.
+
+### SynchronousQueue Impl ###
+
+The easiest way is use reentrylock or synchronized keywords.
+
+The second way is use semaphor. Use three semaphors: send(1), recv(0), sync(0).
+
+When putting item:
+
+
+```
+    send.acquire();
+    saveItem(element);
+    //notify consumer
+    recv.release();
+    sync.acquire();
+```
+
+when taking item:
+
+
+```
+    recv.acquire();
+    Element e = getItem();
+    sync.release();
+    send.release();
+```
+
+the JDK1.5 use the AbstractQueueSynchroinzer to implement the synchronousQueue, And we will 
+talk the AbstractQueueSynchronizer later.
+
+the JDK1.6 use lock-free algrithm, which better performance over jdk1.5.
+
+### TransferQueue LinkedTransferQueue ###
+
+The JDK1.7 adds new queue named transferQueue, according to the Dog Lea's speaking:
+
+Its an blockingQueue, concurrentLinkedQueue, synchronousQueue. It supports the following:
+
+* Act as BlockingQueue, you can use the blockingQueue interface method.
+* Act as SynchronousQueue. it add new method transfer, tryTransfer, tryTransfer(timeout).it has the 
+semantics of add the element to the queue and block the thread until the elment being consumed by some
+other thread. 
+
+* the linkedTransferQueue has more efficient implementation. 
+* it has two aided methods, hasWaitingConsumer()  & getWaitingCounsumerCount()
+
+
+### SynchronousQueue Usage ###
+
+Inside the jdk, the Executors.newCachedThreadThreadPool() uses it. it create new thread when
+new task arriving and reuse the existing free thread if possilbe. the thread will be killed if free for 60 seconds.
+
+
+### Resource Reference ###
+
+[Java Synchronous Queue](http://ifeve.com/java-synchronousqueue/)
+
+[Java7 Transfer Queue](http://ifeve.com/java-transfer-queue/)
