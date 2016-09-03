@@ -170,7 +170,57 @@ Install Tomcat 8 to configure JAVA Application Server](https://www.server-world.
 
 5. install mysql
 
-
+	- Install Step
+		- download the mysql rpm
+			wget http://repo.mysql.com/mysql-community-release-el7-7.noarch.rpm
+		
+		- Install the rpm (i short for install h-> hash)
+		
+			rpm -ivh mysql-community-release-el7-7.noarch.rpm
+		
+		- Update the yum by use `sudo yum update`
+		
+		- Install mysql-server
+		
+			sudo yum install mysql-server
+		- Security mysql-server
+		
+			 sudo mysql_secure_installation
+			 
+			 make sure, no root login, no test database, no anonymous user.
+		
+	- Create DB & User & right grant
+		
+		- create database testDB
+		- create user 'testuser'@'localhost' identified by 'password'
+		- grant all on testdb.* to 'testuser' identified by 'password'
+		
+	- Root Rescue
+		- kill the existing mysql instance stop the mysqld service
+		- enter the sqld safe mode.
+		- As you may seen from the name sqld_safe, yes it is safe mode, which means you can do what ever you want.
+		- systemctl stop mysqld
+		- start the safe mode mysqld_safe  (sudo mysqld_safe --skip-grant-tabls&)
+		- update users password
+		
+			```
+				use mysql;
+				update user set PASSWORD=PASSWORD("newpass") Where USER='root';
+				//flush the privileges;
+				flush privileges;
+				exit;
+			```
+	- Mysql Performance Tune (mysqltuner.pl)
+	
+		SomeTime we may run into sutation where mysql performance poorly  and we need to dig the problem, its where mysqltunner.pl come into play. it can easy help your figure out why the mysql performance is bad and its root cause.
+		
+		- Its a perl script and it need the root privileges of Mysql.
+		- Get it by ` wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/mysqltuner.pl`
+		- Simply run it by `perl ./mysqltuner.pl`.
+		- Of course it will ask you for root password of mysql
+			 
+	- Reference
+		- [Install MySql on Centos7](https://www.linode.com/docs/databases/mysql/how-to-install-mysql-on-centos-7)
 6. learning material:
 
 7. firewall:
